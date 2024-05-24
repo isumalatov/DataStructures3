@@ -44,16 +44,16 @@ TVectorCalendario::TVectorCalendario()
     c = NULL;
 }
 
-TVectorCalendario::TVectorCalendario(int tamaño)
+TVectorCalendario::TVectorCalendario(int tamano)
 {
-    if (tamaño < 1)
+    if (tamano < 1)
     {
         tamano = 0;
         c = NULL;
     }
     else
     {
-        tamano = tamaño;
+        tamano = tamano;
         c = new TCalendario[tamano];
     }
 }
