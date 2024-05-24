@@ -19,11 +19,14 @@ private:
     void InordenAux(TVectorCalendario &, int &) const;
     void PreordenAux(TVectorCalendario &, int &) const;
     void PostordenAux(TVectorCalendario &, int &) const;
+    int obtenerNodoFE() const;
+    void obtenerArbolFE();
     void rotacionII();
     void rotacionDD();
     void rotacionID();
     void rotacionDI();
-    
+    void comprobarFE();
+
 public:
     TAVLCalendario();
     TAVLCalendario(const TAVLCalendario &);
@@ -33,6 +36,7 @@ public:
     bool operator!=(const TAVLCalendario &) const;
     bool EsVacio() const;
     bool Insertar(const TCalendario &);
+    bool Borrar(const TCalendario &);
     bool Buscar(const TCalendario &) const;
     int Altura() const;
     int Nodos() const;
@@ -40,7 +44,6 @@ public:
     TVectorCalendario Inorden() const;
     TVectorCalendario Preorden() const;
     TVectorCalendario Postorden() const;
-    bool Borrar(const TCalendario &);
     TCalendario Raiz() const;
 };
 
