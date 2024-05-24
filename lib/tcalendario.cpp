@@ -34,7 +34,6 @@ void TCalendario::copia(const TCalendario &c)
     dia = c.dia;
     mes = c.mes;
     anyo = c.anyo;
-    delete[] mensaje; // Liberar la memoria antigua
     if (c.mensaje != NULL)
     {
         mensaje = new char[strlen(c.mensaje) + 1];
@@ -93,18 +92,19 @@ TCalendario::~TCalendario()
     if (mensaje != NULL)
     {
         delete[] mensaje;
-        mensaje = NULL;
     }
+
+    mensaje = NULL;
 }
 
 TCalendario &TCalendario::operator=(const TCalendario &c)
 {
     if (this != &c)
-    { // Protección contra autoasignación
+    {
         (*this).~TCalendario();
         copia(c);
     }
-    return *this; // Devolver una referencia a este objeto
+    return *this;
 }
 
 TCalendario TCalendario::operator+(int n)

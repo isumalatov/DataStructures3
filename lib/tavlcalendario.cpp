@@ -220,202 +220,157 @@ TVectorCalendario TAVLCalendario::Postorden() const
     return vector;
 }
 
-int TAVLCalendario::obtenerNodoFE() const
+int TAVLCalendario::nodoFE() const
 {
-    return (raiz->de.Altura() - raiz->iz.Altura());
+    return raiz->de.Altura() - raiz->iz.Altura();
 }
 
-void TAVLCalendario::obtenerArbolFE()
+void TAVLCalendario::actualizarArbolFE()
 {
     if (raiz != NULL)
     {
-        raiz->iz.obtenerArbolFE();
-        raiz->de.obtenerArbolFE();
-        raiz->fe = obtenerNodoFE();
+        raiz->iz.actualizarArbolFE();
+        raiz->de.actualizarArbolFE();
+        raiz->fe = nodoFE();
+    }
+}
+
+void TAVLCalendario::arreglarArbol()
+{
+
+    raiz->fe = nodoFE();
+
+    if (raiz->fe < -1)
+    {
+        raiz->fe <= 0 ? rotacionII() : rotacionID();
+    }
+    else if (raiz->fe > 1)
+    {
+        raiz->fe >= 0 ? rotacionDD() : rotacionDI();
     }
 }
 
 void TAVLCalendario::rotacionII()
 {
 
-    TNodoAVL *j;
-
-    j = raiz->iz.raiz;
+    TNodoAVL *j = raiz->iz.raiz;
     raiz->iz.raiz = raiz->iz.raiz->de.raiz;
     j->de.raiz = raiz;
     raiz = j;
-
-    obtenerArbolFE();
+    actualizarArbolFE();
 }
 
 void TAVLCalendario::rotacionID()
 {
 
-    TNodoAVL *j;
-
-    j = raiz->iz.raiz;
+    TNodoAVL *j = raiz->iz.raiz;
     raiz->iz.raiz = j->de.raiz->de.raiz;
     j->de.raiz->de.raiz = raiz;
     raiz = j->de.raiz;
     j->de.raiz = raiz->iz.raiz;
     raiz->iz.raiz = j;
-
-    obtenerArbolFE();
+    actualizarArbolFE();
 }
 
 void TAVLCalendario::rotacionDD()
 {
 
-    TNodoAVL *j;
-
-    j = raiz->de.raiz;
+    TNodoAVL *j = raiz->de.raiz;
     raiz->de.raiz = raiz->de.raiz->iz.raiz;
     j->iz.raiz = raiz;
     raiz = j;
-
-    obtenerArbolFE();
+    actualizarArbolFE();
 }
 
 void TAVLCalendario::rotacionDI()
 {
 
-    TNodoAVL *j;
-
-    j = raiz->de.raiz;
+    TNodoAVL *j = raiz->de.raiz;
     raiz->de.raiz = j->iz.raiz->iz.raiz;
     j->iz.raiz->iz.raiz = raiz;
     raiz = j->iz.raiz;
     j->iz.raiz = raiz->de.raiz;
     raiz->de.raiz = j;
-
-    obtenerArbolFE();
-}
-
-void TAVLCalendario::comprobarFE()
-{
-
-    raiz->fe = obtenerNodoFE();
-
-    if (raiz->fe < -1)
-    {
-        if (raiz->iz.raiz->fe <= 0)
-        {
-            rotacionII();
-        }
-        else
-        {
-            rotacionID();
-        }
-    }
-    else if (raiz->fe > 1)
-    {
-        if (raiz->de.raiz->fe >= 0)
-        {
-            rotacionDD();
-        }
-        else
-        {
-            rotacionDI();
-        }
-    }
+    actualizarArbolFE();
 }
 
 bool TAVLCalendario::Insertar(const TCalendario &cal)
 {
 
-    bool insertado = false;
+    if (this->Buscar(cal))
+        return false;
 
-    if (!this->Buscar(cal))
+    if (this->EsVacio())
     {
-
-        if (this->EsVacio())
-        {
-
-            TNodoAVL *nodoInsertar = new TNodoAVL();
-            nodoInsertar->item = cal;
-            raiz = nodoInsertar;
-            insertado = true;
-        }
-        else
-        {
-
-            if (raiz->item > cal)
-            {
-                insertado = raiz->iz.Insertar(cal);
-            }
-            else
-            {
-                insertado = raiz->de.Insertar(cal);
-            }
-        }
+        TNodoAVL *nodoInsertar = new TNodoAVL();
+        nodoInsertar->item = cal;
+        raiz = nodoInsertar;
+    }
+    else
+    {
+        raiz->item > cal ? raiz->iz.Insertar(cal) : raiz->de.Insertar(cal);
     }
 
-    if (insertado)
+    arreglarArbol();
+    return true;
+}
+
+void TAVLCalendario::handleNodeDeletion()
+{
+    if (raiz->iz.EsVacio() && raiz->de.EsVacio())
     {
-        comprobarFE();
+        raiz = NULL;
+    }
+    else if (raiz->iz.EsVacio())
+    {
+        raiz = raiz->de.raiz;
+    }
+    else if (raiz->de.EsVacio())
+    {
+        raiz = raiz->iz.raiz;
+    }
+    else
+    {
+        replaceWithInorderPredecessor();
+    }
+}
+
+void TAVLCalendario::replaceWithInorderPredecessor()
+{
+    TNodoAVL *aux = raiz->iz.raiz;
+    TCalendario sustituto = raiz->iz.raiz->item;
+
+    while (!aux->de.EsVacio())
+    {
+        sustituto = aux->de.raiz->item;
+        aux = aux->de.raiz;
     }
 
-    return insertado;
+    raiz->item = sustituto;
+    raiz->iz.Borrar(sustituto);
 }
 
 bool TAVLCalendario::Borrar(const TCalendario &cal)
 {
+    if (!Buscar(cal))
+        return false;
 
-    bool borrado = false;
-
-    if (Buscar(cal))
+    if (Raiz() > cal)
     {
-
-        if (Raiz() > cal)
-        {
-            borrado = raiz->iz.Borrar(cal);
-        }
-        else if (Raiz() < cal)
-        {
-            borrado = raiz->de.Borrar(cal);
-        }
-        else if (raiz->iz.EsVacio() && raiz->de.EsVacio())
-        {
-            raiz = NULL;
-            borrado = true;
-        }
-        else if (raiz->iz.EsVacio())
-        {
-            raiz = raiz->de.raiz;
-            borrado = true;
-        }
-        else if (raiz->de.EsVacio())
-        {
-            raiz = raiz->iz.raiz;
-            borrado = true;
-        }
-        else if (!raiz->iz.EsVacio() && !raiz->de.EsVacio())
-        {
-
-            TNodoAVL *aux = raiz->iz.raiz;
-            TCalendario sustituto = raiz->iz.raiz->item;
-
-            while (!aux->de.EsVacio())
-            {
-                sustituto = aux->de.raiz->item;
-                aux = aux->de.raiz;
-            }
-
-            raiz->item = sustituto;
-            raiz->iz.Borrar(sustituto);
-        }
-        else
-        {
-            borrado = false;
-        }
+        raiz->iz.Borrar(cal);
+    }
+    else if (Raiz() < cal)
+    {
+        raiz->de.Borrar(cal);
+    }
+    else
+    {
+        handleNodeDeletion();
     }
 
     if (raiz != NULL)
-    {
-        comprobarFE();
-    }
-
-    return borrado;
+        arreglarArbol();
+    return true;
 }
 
 ostream &operator<<(ostream &s, const TAVLCalendario &arbol)

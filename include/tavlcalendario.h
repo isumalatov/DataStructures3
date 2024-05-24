@@ -19,13 +19,15 @@ private:
     void InordenAux(TVectorCalendario &, int &) const;
     void PreordenAux(TVectorCalendario &, int &) const;
     void PostordenAux(TVectorCalendario &, int &) const;
-    int obtenerNodoFE() const;
-    void obtenerArbolFE();
+    int nodoFE() const;
+    void actualizarArbolFE();
+    void arreglarArbol();
     void rotacionII();
     void rotacionDD();
     void rotacionID();
     void rotacionDI();
-    void comprobarFE();
+    void handleNodeDeletion();
+    void replaceWithInorderPredecessor();
 
 public:
     TAVLCalendario();
